@@ -1,0 +1,192 @@
+*{
+ margin: 0;
+ padding: 0;
+box-sizing: border-box;
+ font-family: sans-serif;
+}
+
+/* Style globaux*/
+input{
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  border: none;
+  font-size: 1rem;
+}
+
+input:focus{
+  background-color: lightgray;
+}
+
+button{
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: none;
+  cursor: pointer;
+  background-color: #ee9612;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  transition: all 0.5s;
+}
+
+button:hover{
+  color: white;
+  background-color: #a86808;
+}
+
+button:active{
+  border: solid thin #474747;
+}
+
+li{
+  margin: 0.5rem;
+  padding: 1rem 0;
+  border: solid thin rgb(212, 210, 210);
+  border-radius: 0.5rem;
+}
+
+/* Conteneur de recherche */
+.conteneur{
+  padding: 1rem;
+  background-color: darkcyan;
+  border-bottom: solid 1px #474747;
+  height: 120px;
+  z-index: 1;
+  -webkit-box-shadow: 1px 2px 7px 3px #474747;
+  box-shadow: 1px 2px 7px 3px #474747;
+
+}
+
+/* Conteneur de réponse */
+.class-response{
+  position: absolute;
+  top: 120px;
+  left : 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem 0;
+  overflow: scroll;
+}
+
+/* code postal */
+.cp{
+  padding: 1rem 0.5rem; 
+  margin-right: 1rem;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  background-color: #ee9612;
+
+}
+
+.error{
+  padding: 1rem;
+  text-align: center;
+  color :  rgb(223, 14, 14);
+}
+#map {
+        height: 100%;
+      }
+<div class="wrapper">
+	<div class="conteneur" id="app">
+		<input id="texte" placeholder="Entrer un nom de ville">
+  <button id="btn-search">Chercher Ville</button>
+</div>
+<div class="class-response" id="id-response">
+</div>
+<div id="map"></div>
+<!--    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 8
+        });
+      }
+    </script>
+ <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeqMcjHplVi6CruaUDFz8qyqMmVjUX1lM&callback=initMap"
+    async defer></script>-->
+</div>
+
+// Import stylesheets
+import './style.css';
+
+//Ma fonction de recherche
+/*var fonctionRechercheEs6 = function (searchTerm) {
+  fetch('https://vicopo.selfbuild.fr/cherche/' + searchTerm)
+    .then(data => data.json())
+    .then(data => console.log(data))
+    .catch(error => console.log(error));
+
+}*/
+
+var fonctionRecherche = function (searchTerm) {
+
+  var request = new XMLHttpRequest();
+  //On load : évènement de succès
+  request.onload = function (data) {
+    //On va mettre ce contenu dans la balise
+    //div ayant l'id : reponse
+    /*
+    document.querySelector('div');
+    document.querySelector('.class-response');
+    */
+
+    var data = JSON.parse(this.response),
+      affichage = data.cities
+        .sort(function (a, b) {
+          return a.code - b.code
+        })
+        .reduce(function (acc, ville) {
+          return acc += "<li> <span class='cp'>" + ville.code + '</span> ' + ville.city + "</li>";
+        }, '');
+
+    document.querySelector('#id-response').innerHTML =
+      "<ul>" + affichage + "</ul>";
+  };
+
+  request.onerror = function (data) {
+    document.querySelector('#id-response').innerHTML =
+      "<div class='error'>Erreur d'appel</div>";
+  };
+
+  if(searchTerm && searchTerm.length > 0){
+  request.open('GET', 'https://vicopo.selfbuild.fr/cherche/' + searchTerm);
+  request.send(null);
+  }else{
+    document.querySelector('#id-response').innerHTML =
+      "<div class='error'>Valeur de recherche vide</div>";
+  }
+
+}
+
+document.querySelector('#btn-search').onclick = function () {
+  var searchTerm = document.querySelector('#texte').value;
+  fonctionRecherche(searchTerm)
+}
+
+var fonctionLatitudeLongitude = function(city){
+  var request = new XMLHttpRequest();
+  //On load : évènement de succès
+  request.onload = function (data) {
+    if (city && city.length > 0 ){
+    request.open('GET', 'https://geocode.xyz/' + city + '?json=1')
+    }
+  }
+
+var maps = function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 8
+        });
+
+        var request = new XMLHttpRequest();
+  //On load : évènement de succès
+  request.onload = function (data) {
+    if (map && map.length > 0 ){
+    request.open('GET', "https://maps.googleapis.com/maps/api/js?key=AIzaSyBeqMcjHplVi6CruaUDFz8qyqMmVjUX1lM&callback=initMap")
+    }
+  }
+}
+}
+
